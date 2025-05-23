@@ -1,5 +1,5 @@
 from azure.ai.agents import AgentsClient
-from azure.ai.agents.models import FilePurpose, CodeInterpreterTool, ListSortOrder, MessageRole
+from azure.ai.agents.models import FilePurpose, CodeInterpreterTool, AgentThread, MessageRole
 from azure.identity import DefaultAzureCredential
 
 from dotenv import load_dotenv
@@ -38,7 +38,7 @@ def agent():
         agent = agent_client.create_agent(
             model=os.environ["MODEL_DEPLOYMENT_NAME"],
             name="my-agent",
-            instructions="You are helpful agent who can analyze files and produce charts",
+            instructions="You are helpful agent who can analyze files and produce charts. Use the uploaded file energy.txt",
             tools = code_interpreter_tool.definitions,
             tool_resources=code_interpreter_tool.resources,
         )
@@ -67,11 +67,34 @@ def agent():
             last_msg = agent_client.messages.get_last_message_text_by_role(
                     thread_id=thread.id,
                     role=MessageRole.AGENT)
+        
 
             print(f"Model response: {last_msg.text.value}")
             if run.status == "failed":
                 print(f"Run failed: {run.last_error}")
+
+        save_generated_images(agent_client,thread)
       
+def print_conversation_history(agent:AgentsClient, thread:AgentThread):
+
+    messages = agent.messages.list(thread_id=thread.id)
+
+    for message in messages:
+        if message.text_messages:
+            last_msg = message.text_messages[-1]
+
+            print(f"{message.role}: {last_msg.text.value}\n")
+            
+def save_generated_images(agent:AgentsClient, thread:AgentThread):
+
+    messages = agent.messages.list(thread_id=thread.id)
+
+    for message in messages:
+        for image in message.image_contents:
+            file_name = f"{image.image_file.file_id}_image.png"
+            agent.files.save(image.image_file.file_id,file_name)
+
+
 
 if __name__ == "__main__":
     # Create and run the agent
