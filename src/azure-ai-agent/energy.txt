@@ -1,0 +1,6 @@
+Month, Gas (Kwh), Electricity (Kwh)
+January,1000, 300
+February,1200,320
+March, 800, 250
+April, 600, 250
+May, 400, 200

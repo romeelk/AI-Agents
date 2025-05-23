@@ -1,0 +1,82 @@
+from azure.ai.agents import AgentsClient
+from azure.ai.agents.models import FilePurpose, CodeInterpreterTool, ListSortOrder, MessageRole
+from azure.identity import DefaultAzureCredential
+
+from dotenv import load_dotenv
+import os
+
+def agent():
+    load_dotenv()
+    project_endpoint= os.getenv("PROJECT_ENDPOINT")
+    model_deployment = os.getenv("MODEL_DEPLOYMENT_NAME")
+
+    # Create a new agent instance
+    agent_client = AgentsClient(
+        endpoint=project_endpoint,
+        credential=DefaultAzureCredential(
+            exclude_environment_credential=True,
+            exclude_managed_identity_credential=True
+        )
+    )
+
+    # Get current directory
+    current_path = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_path, "energy.txt")
+    # Upload energy.txt
+
+    # Upload the data file and create a CodeInterpreterTool
+    file = agent_client.files.upload_and_poll(
+        file_path=file_path, purpose=FilePurpose.AGENTS
+    )
+    print(f"Uploaded {file.filename}")
+
+ 
+    code_interpreter_tool = CodeInterpreterTool(file_ids=[file.id])
+
+    with agent_client:
+
+        agent = agent_client.create_agent(
+            model=os.environ["MODEL_DEPLOYMENT_NAME"],
+            name="my-agent",
+            instructions="You are helpful agent who can analyze files and produce charts",
+            tools = code_interpreter_tool.definitions,
+            tool_resources=code_interpreter_tool.resources,
+        )
+
+        print(f"Started agent {model_deployment}")
+
+        thread = agent_client.threads.create()
+
+        
+        while True:
+            prompt = input("Ask me a question (type q to exit): ")
+
+            if prompt.lower() == "q":
+                print("Quitting chat")
+                break
+            
+            # Send a prompt to the agent
+            message = agent_client.messages.create(
+                thread_id=thread.id,
+                role="user",
+                content=prompt,
+                )
+            
+            run = agent_client.runs.create_and_process(thread_id=thread.id, agent_id=agent.id)
+            
+            last_msg = agent_client.messages.get_last_message_text_by_role(
+                    thread_id=thread.id,
+                    role=MessageRole.AGENT)
+
+            print(f"Model response: {last_msg.text.value}")
+            if run.status == "failed":
+                print(f"Run failed: {run.last_error}")
+      
+
+if __name__ == "__main__":
+    # Create and run the agent
+
+    try:
+        ai_agent = agent()
+    except Exception as e:
+        print(f"Error creating agent: {e}")
