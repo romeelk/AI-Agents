@@ -1,3 +1,4 @@
+from pathlib import Path
 from azure.ai.agents import AgentsClient
 from azure.ai.agents.models import FilePurpose, CodeInterpreterTool, AgentThread, MessageRole
 from azure.identity import DefaultAzureCredential
@@ -93,6 +94,7 @@ def save_generated_images(agent:AgentsClient, thread:AgentThread):
         for image in message.image_contents:
             file_name = f"{image.image_file.file_id}_image.png"
             agent.files.save(image.image_file.file_id,file_name)
+            print(f"Saved image file to: {Path.cwd() / file_name}")
 
 
 
