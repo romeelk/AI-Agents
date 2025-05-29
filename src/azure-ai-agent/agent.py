@@ -5,6 +5,7 @@ from azure.identity import DefaultAzureCredential
 
 from dotenv import load_dotenv
 import os
+import traceback
 
 def agent():
     load_dotenv()
@@ -90,10 +91,11 @@ def save_generated_images(agent:AgentsClient, thread:AgentThread):
 
     messages = agent.messages.list(thread_id=thread.id)
 
+    path_to_save = os.path.join(Path.cwd(),"outputs")
     for message in messages:
         for image in message.image_contents:
-            file_name = f"{image.image_file.file_id}_image.png"
-            agent.files.save(image.image_file.file_id,file_name)
+            file_name = os.path.join(path_to_save,f"{image.image_file.file_id}_image.png")
+            agent.files.save(image.image_file.file_id, file_name,path_to_save)
             print(f"Saved image file to: {Path.cwd() / file_name}")
 
 
@@ -104,4 +106,4 @@ if __name__ == "__main__":
     try:
         ai_agent = agent()
     except Exception as e:
-        print(f"Error creating agent: {e}")
+        print(f"Error creating agent at line {e.__traceback__.tb_lineno}: {traceback.format_exc()}")
