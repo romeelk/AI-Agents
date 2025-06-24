@@ -1,0 +1,6 @@
+# Add your project dependencies below
+# Example:
+# python-dotenv
+# azure-ai
+semantic-kernel
+azure-identity
