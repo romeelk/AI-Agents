@@ -32,7 +32,6 @@ def agent():
     )
     print(f"Uploaded {file.filename}")
 
- 
     code_interpreter_tool = CodeInterpreterTool(file_ids=[file.id])
 
     with agent_client:
