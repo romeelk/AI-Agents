@@ -3,10 +3,12 @@ import tempfile
 import os
 from datetime import datetime
 from zipfile import ZipFile
+from semantic_kernel.functions.kernel_function_decorator import kernel_function
 
 class DeploymentPlugin:
     """A Semantic Kernel plugin that simulates deployment of Python server code"""
 
+    @kernel_function(description="A function that packages python code as a zip file")
     def package_code(self, pythoncode: str):
         print("zipping code...")
         artifacts_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),"artifacts")
@@ -25,6 +27,7 @@ class DeploymentPlugin:
         
         return zip_file_name
 
+    @kernel_function(description="A function that deploys a zip file")
     def deploy_code(self, code_package_file: str):
         # basic validation - does the file path exist
 
