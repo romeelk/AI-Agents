@@ -1,12 +1,16 @@
 from semantic_kernel.agents import AzureAIAgent, AzureAIAgentSettings, AgentGroupChat
+from semantic_kernel.contents import ChatMessageContent, AuthorRole
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential
 import asyncio
 import os
 
+import logging
 from  deployment_plugin import DeploymentPlugin
 import agent_constants
-from selection_strategy import SelectionStrategy
+from selection_strategy import SelectionStrategy, SequentialSelectionStrategy
+from approval_strategy import ApprovalTerminationStrategy
+
 async def main():
     try:
         creds = DefaultAzureCredential()
@@ -17,11 +21,11 @@ async def main():
                 model=AzureAIAgentSettings().model_deployment_name,
                 name=agent_constants.CODE_AGENT,
                 instructions="""You are an AI Agent that can generate Python code.
-                For this context you generate simple API server snippets {code_snippet} using pythons fast api.
+                For this context you generate simple API server snippets using pythons fast api.
+
                 RULES:
                 - Use the instructions provided.
-                - If you are asked to create non flask api or fast api code snippet reply: Please request a server snippet
-                - Prepend your response with this text: "CODE_ASSISTANT > 
+                - If you are asked to create non flask api or fast api code snippet reply: Please request a server snippet.
                 """,
             )
             print(f"Successfully created AI agent code agent {azure_code_ai_agent.name}")
@@ -29,18 +33,17 @@ async def main():
             sk_code_agent = AzureAIAgent(
                 client=client,
                 definition=azure_code_ai_agent,
+                plugins=[DeploymentPlugin()]
                 )
             print(f"Created semantic kernel agent {sk_code_agent.name}")
 
             azure_deployment_agent = await client.agents.create_agent(
                 model=AzureAIAgentSettings().model_deployment_name,
                 name=agent_constants.DEPLOYMENT_AGENT,
-                instructions="""You are a bespoke deployment agent that takes python code, uses" 
+                instructions="""You are a bespoke deployment agent that takes python code, uses
                                 the plugin DeploymentPlugin to package and deploy the code.
-
-                                Use the following functions from DeploymentPlugin:
-                                - package_code - take the output of the CODE_AGENT {code_snippet} pass it as parameter {pythoncode}
-                                - deploy_package take the file path returned from package_code and deploy 
+                                
+                                package code {pythoncode}
                                 RULES:
                                 - Use the instructions provided.
                                 - Prepend your response with this text: "DEPLOYMENT_ASSISTANT > """)
@@ -48,7 +51,7 @@ async def main():
             sk_deployment_agent = AzureAIAgent(
             client=client,
             definition=azure_deployment_agent,
-            plugins=[DeploymentPlugin()]
+            plugins=[DeploymentPlugin(),sk_code_agent]
             )
 
             print(f"Created semantic kernel agent {sk_deployment_agent.name}")
@@ -56,9 +59,16 @@ async def main():
             # create an agent group chat
 
             # Create chat with participating agents
-            chat = AgentGroupChat(agents=[sk_code_agent, sk_deployment_agent],selection_strategy=SelectionStrategy(agents=[sk_code_agent,sk_deployment_agent]))
+            chat = AgentGroupChat(agents=[sk_code_agent, sk_deployment_agent],
+                                  selection_strategy=SelectionStrategy(agents=[sk_code_agent,sk_deployment_agent]),
+                                  termination_strategy=ApprovalTerminationStrategy(agents=[sk_deployment_agent], 
+                                                                        maximum_iterations=1, 
+                                                                        automatic_reset=True))
             user_prompt = input("Ask the agent:")
-            await chat.add_chat_message(user_prompt)
+
+            chat_message = ChatMessageContent(role=AuthorRole.USER, content=user_prompt)
+
+            await chat.add_chat_message(message=chat_message)
             async for response in chat.invoke():
                 if response is None or not response.name:
                     continue
