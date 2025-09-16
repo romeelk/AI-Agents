@@ -60,7 +60,7 @@ while (true)
 
     var input = Console.ReadLine();
 
-    if (input == "e") break;
+    if (input.Equals("e",StringComparison.OrdinalIgnoreCase)) break;
 
     messages.Add(new(ChatRole.User, input));
 
