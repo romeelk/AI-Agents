@@ -28,7 +28,7 @@ IChatClient client =
     new ChatClientBuilder(
         new AzureOpenAIClient(new Uri(azoaEndpoint),
         new DefaultAzureCredential())
-        .GetChatClient("gpt-4o").AsIChatClient())
+        .GetChatClient(azoaDeployedModel).AsIChatClient())
         .UseFunctionInvocation()
         .Build();
 

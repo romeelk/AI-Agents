@@ -77,7 +77,12 @@ def agent():
         save_generated_images(agent_client,thread)
       
 def print_conversation_history(agent:AgentsClient, thread:AgentThread):
+    """_summary_
 
+    Args:
+        agent (AgentsClient): Agent client
+        thread (AgentThread): Agent thread
+    """
     messages = agent.messages.list(thread_id=thread.id)
 
     for message in messages:
@@ -87,7 +92,12 @@ def print_conversation_history(agent:AgentsClient, thread:AgentThread):
             print(f"{message.role}: {last_msg.text.value}\n")
             
 def save_generated_images(agent:AgentsClient, thread:AgentThread):
+    """ Save generated images from the agent's messages.
 
+    Args:
+        agent (AgentsClient): _description_
+        thread (AgentThread): _description_
+    """
     messages = agent.messages.list(thread_id=thread.id)
 
     path_to_save = os.path.join(Path.cwd(),"outputs")

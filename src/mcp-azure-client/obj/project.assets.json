@@ -2088,19 +2088,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/romeel.khan@contino.io/.nuget/packages/": {}
+    "/Users/romeelkhan/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/romeel.khan@contino.io/dev/AI-Agents/src/mcp-azure-client/mcp-azure-client.csproj",
+      "projectUniqueName": "/Users/romeelkhan/development/AI-Agents/src/mcp-azure-client/mcp-azure-client.csproj",
       "projectName": "mcp-azure-client",
-      "projectPath": "/Users/romeel.khan@contino.io/dev/AI-Agents/src/mcp-azure-client/mcp-azure-client.csproj",
-      "packagesPath": "/Users/romeel.khan@contino.io/.nuget/packages/",
-      "outputPath": "/Users/romeel.khan@contino.io/dev/AI-Agents/src/mcp-azure-client/obj/",
+      "projectPath": "/Users/romeelkhan/development/AI-Agents/src/mcp-azure-client/mcp-azure-client.csproj",
+      "packagesPath": "/Users/romeelkhan/.nuget/packages/",
+      "outputPath": "/Users/romeelkhan/development/AI-Agents/src/mcp-azure-client/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/romeel.khan@contino.io/.nuget/NuGet/NuGet.Config"
+        "/Users/romeelkhan/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -2124,7 +2124,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net9.0": {
@@ -2195,7 +2195,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.304/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.200/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
